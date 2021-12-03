@@ -23,7 +23,9 @@ function BondUpdate({ open, setOpen }) {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const transaction = await contract.updateBond(isActive, minimumDeposit);
+      const transaction = await contract.updateBond(isActive, minimumDeposit, {
+        gasLimit: 300000,
+      });
       await transaction.wait();
     } catch (error) {
       console.error(error.message);

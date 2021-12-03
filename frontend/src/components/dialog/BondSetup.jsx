@@ -33,7 +33,10 @@ function BondSetup({ open, setOpen }) {
         interestThreeMonth,
         interestSixMonth,
         interestTwelveMonth,
-        minimumDeposit
+        minimumDeposit,
+        {
+          gasLimit: 300000,
+        }
       );
       await transaction.wait();
     } catch (error) {
