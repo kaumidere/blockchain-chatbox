@@ -1,3 +1,5 @@
+export const TRANSACTION_PREFIX = "https://kovan.etherscan.io/tx/";
+
 export const BOND_CONTRACT_ADDRESS =
   "0xF753E11Ef6b4DAdEFDD1fd442089Cd5e71dEC7Ca";
 export const TOKEN_CONTRACT_ADDRESS =

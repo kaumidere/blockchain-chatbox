@@ -12,6 +12,11 @@ import Main from "./Main";
 
 export const ContractContext = createContext();
 
+export const AppContext = createContext({
+  message: {},
+  setMessage: () => {},
+});
+
 function getContract() {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
@@ -22,6 +27,7 @@ function getContract() {
 function App() {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState({});
 
   useEffect(() => {
     async function checkWallet() {
@@ -52,7 +58,9 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <ContractContext.Provider value={getContract()}>
-        <Main />
+        <AppContext.Provider value={{ message, setMessage }}>
+          <Main />
+        </AppContext.Provider>
       </ContractContext.Provider>
     </ThemeProvider>
   );

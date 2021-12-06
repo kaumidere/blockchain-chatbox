@@ -1,17 +1,18 @@
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import Container from "@mui/material/Container";
 import { useContext, useEffect, useState } from "react";
-import { ContractContext } from "./App";
+import { AppContext, ContractContext } from "./App";
 import BondCard from "./BondCard";
 import UserCard from "./UserCard";
 
 function Main() {
   const contract = useContext(ContractContext);
+  const { message, setMessage } = useContext(AppContext);
   const [currentAccount, setCurrentAccount] = useState(null);
   const [bondInfo, setBondInfo] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
 
   const connectWallet = async () => {
     try {
@@ -20,9 +21,9 @@ function Main() {
       });
       console.log("Connected", accounts[0]);
       setCurrentAccount(accounts[0]);
-      setErrorMessage(null);
+      setMessage({});
     } catch (error) {
-      setErrorMessage(error.message);
+      setMessage({ type: "error", content: error.message });
     }
   };
 
@@ -38,12 +39,12 @@ function Main() {
           setCurrentAccount(account);
         }
       } catch (error) {
-        setErrorMessage(error.message);
+        setMessage({ type: "error", content: error.message });
       }
     };
 
     initializeWallet();
-  }, []);
+  }, [setMessage]);
 
   useEffect(() => {
     const getBondInfo = async () => {
@@ -51,7 +52,7 @@ function Main() {
         const bondInfo = await contract.bondInfo();
         setBondInfo(bondInfo);
       } catch (error) {
-        setErrorMessage(error.message);
+        setMessage({ type: "error", content: error.message });
       }
     };
 
@@ -60,7 +61,7 @@ function Main() {
         const userInfo = await contract.userInfo(currentAccount);
         setUserInfo(userInfo);
       } catch (error) {
-        setErrorMessage(error.message);
+        setMessage({ type: "error", content: error.message });
       }
     };
 
@@ -68,12 +69,16 @@ function Main() {
       getBondInfo();
       getUserInfo();
     }
-  }, [currentAccount, contract]);
+  }, [currentAccount, contract, setMessage]);
 
   return (
-    <Container maxWidth="sm" sx={{ pt: 2 }}>
-      {errorMessage && <Alert severity="warning">{errorMessage}</Alert>}
-      {currentAccount && <Alert severity="success">{currentAccount}</Alert>}
+    <Container maxWidth="sm" sx={{ mt: 1 }}>
+      {currentAccount && <Chip label={`Connected: ${currentAccount}`} />}
+      {message.content && (
+        <Alert severity={message.type} sx={{ mt: 2 }}>
+          {message.content}
+        </Alert>
+      )}
       {!currentAccount && (
         <Button variant="outlined" onClick={connectWallet}>
           Connect Wallet
