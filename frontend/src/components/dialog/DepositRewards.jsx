@@ -9,9 +9,10 @@ import TextField from "@mui/material/TextField";
 import { useContext, useState } from "react";
 import { TRANSACTION_PREFIX } from "../../constants";
 import { AppContext, ContractContext } from "../App";
+import {ethers} from "ethers";
 
 function DepositRewards({ open, setOpen }) {
-  const contract = useContext(ContractContext);
+  const { bond: bondContract, token: tokenContract } = useContext(ContractContext);
   const { setMessage } = useContext(AppContext);
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,16 +24,28 @@ function DepositRewards({ open, setOpen }) {
   const handleSubmit = async () => {
     setLoading(true);
     setMessage({});
-    const transaction = await contract.depositRewards(amount, {
+
+    const tokenDecimals = await tokenContract.decimals();
+
+    const amountParsed = ethers.utils.parseUnits(amount, tokenDecimals);
+
+    const setAllowanceTransaction = await tokenContract.approve(bondContract.address, amountParsed, {
       gasLimit: 300000,
     });
+
     try {
-      await transaction.wait();
+      await setAllowanceTransaction.wait();
+
+      const depositTransaction = await bondContract.depositRewards(amountParsed, {
+        gasLimit: 300000,
+      });
+      await depositTransaction.wait();
+
       setMessage({
         type: "success",
         content: (
           <Link
-            href={`${TRANSACTION_PREFIX}${transaction.hash}`}
+            href={`${TRANSACTION_PREFIX}${depositTransaction.hash}`}
             target="_blank"
             rel="noopener"
           >
@@ -45,7 +58,7 @@ function DepositRewards({ open, setOpen }) {
         type: "error",
         content: (
           <Link
-            href={`${TRANSACTION_PREFIX}${transaction.hash}`}
+            href={`${TRANSACTION_PREFIX}${error.receipt.transactionHash}`}
             target="_blank"
             rel="noopener"
           >

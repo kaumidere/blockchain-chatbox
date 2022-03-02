@@ -7,11 +7,12 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import { useContext, useState } from "react";
+import { ethers } from "ethers";
 import { TRANSACTION_PREFIX } from "../../constants";
 import { AppContext, ContractContext } from "../App";
 
 function Deposit({ open, setOpen }) {
-  const contract = useContext(ContractContext);
+  const { bond: bondContract, token: tokenContract } = useContext(ContractContext);
   const { setMessage } = useContext(AppContext);
   const [amount, setAmount] = useState("");
   const [timeInMonths, setTimeInMonths] = useState("");
@@ -24,16 +25,28 @@ function Deposit({ open, setOpen }) {
   const handleSubmit = async () => {
     setLoading(true);
     setMessage({});
-    const transaction = await contract.deposit(amount, timeInMonths, {
+
+    const tokenDecimals = await tokenContract.decimals();
+
+    const amountParsed = ethers.utils.parseUnits(amount, tokenDecimals);
+
+    const setAllowanceTransaction = await tokenContract.approve(bondContract.address, amountParsed, {
       gasLimit: 300000,
     });
+
     try {
-      await transaction.wait();
+      await setAllowanceTransaction.wait();
+
+      const depositTransaction = await bondContract.deposit(amountParsed, timeInMonths, {
+        gasLimit: 300000,
+      });
+      await depositTransaction.wait();
+
       setMessage({
         type: "success",
         content: (
           <Link
-            href={`${TRANSACTION_PREFIX}${transaction.hash}`}
+            href={`${TRANSACTION_PREFIX}${depositTransaction.hash}`}
             target="_blank"
             rel="noopener"
           >
@@ -46,7 +59,7 @@ function Deposit({ open, setOpen }) {
         type: "error",
         content: (
           <Link
-            href={`${TRANSACTION_PREFIX}${transaction.hash}`}
+            href={`${TRANSACTION_PREFIX}${error.receipt.transactionHash}`}
             target="_blank"
             rel="noopener"
           >

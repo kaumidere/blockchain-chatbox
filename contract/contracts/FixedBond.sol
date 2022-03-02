@@ -152,7 +152,7 @@ contract FixedBond is Ownable, ReentrancyGuard {
     }
 
     // Withdraw tokens without caring about interest
-    function emergencyWithdraw() public {
+    function emergencyWithdraw() public nonReentrant {
         require(userInfo[msg.sender].amountDeposited > 0, "No active deposit");
         IERC20(token).transfer(
             msg.sender,
@@ -163,7 +163,7 @@ contract FixedBond is Ownable, ReentrancyGuard {
     }
 
     // Withdraw tokens after maturity, and also get the interest earned
-    function withdraw() public {
+    function withdraw() public nonReentrant {
         require(userInfo[msg.sender].amountDeposited > 0, "No active deposit");
         uint256 daysPassed = (block.timestamp -
             userInfo[msg.sender].depositedOn) / 1 days;

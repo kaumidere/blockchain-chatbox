@@ -11,9 +11,10 @@ import TextField from "@mui/material/TextField";
 import { useContext, useState } from "react";
 import { TRANSACTION_PREFIX } from "../../constants";
 import { AppContext, ContractContext } from "../App";
+import {ethers} from "ethers";
 
 function BondSetup({ open, setOpen }) {
-  const contract = useContext(ContractContext);
+  const { bond: bondContract, token: tokenContract } = useContext(ContractContext);
   const { setMessage } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
   const [isActive, setIsActive] = useState(true);
@@ -30,19 +31,24 @@ function BondSetup({ open, setOpen }) {
   const handleSubmit = async () => {
     setLoading(true);
     setMessage({});
-    const transaction = await contract.setupBond(
+
+    const tokenDecimals = await tokenContract.decimals();
+
+    const transaction = await bondContract.setupBond(
       isActive,
       interestOneMonth,
       interestThreeMonth,
       interestSixMonth,
       interestTwelveMonth,
-      minimumDeposit,
+      ethers.utils.parseUnits(minimumDeposit, tokenDecimals),
       {
         gasLimit: 300000,
       }
     );
+
     try {
       await transaction.wait();
+
       setMessage({
         type: "success",
         content: (

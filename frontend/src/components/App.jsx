@@ -5,8 +5,9 @@ import CssBaseline from "@mui/material/CssBaseline";
 import LinearProgress from "@mui/material/LinearProgress";
 import { ethers } from "ethers";
 import { createContext, useEffect, useState } from "react";
-import abi from "../abi/FixedBond.json";
-import { BOND_CONTRACT_ADDRESS } from "../constants";
+import fixedBondABI from "../abi/FixedBond.json";
+import erc20ABI from "../abi/ERC20.json";
+import { BOND_CONTRACT_ADDRESS, TOKEN_CONTRACT_ADDRESS } from "../constants";
 import theme from "../theme";
 import Main from "./Main";
 
@@ -17,11 +18,13 @@ export const AppContext = createContext({
   setMessage: () => {},
 });
 
-function getContract() {
+function getContracts() {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
-  const contract = new ethers.Contract(BOND_CONTRACT_ADDRESS, abi.abi, signer);
-  return contract;
+  return {
+    bond: new ethers.Contract(BOND_CONTRACT_ADDRESS, fixedBondABI, signer),
+    token: new ethers.Contract(TOKEN_CONTRACT_ADDRESS, erc20ABI, signer)
+  };
 }
 
 function App() {
@@ -57,7 +60,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ContractContext.Provider value={getContract()}>
+      <ContractContext.Provider value={getContracts()}>
         <AppContext.Provider value={{ message, setMessage }}>
           <Main />
         </AppContext.Provider>

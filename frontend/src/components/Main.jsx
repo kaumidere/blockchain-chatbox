@@ -6,9 +6,10 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext, ContractContext } from "./App";
 import BondCard from "./BondCard";
 import UserCard from "./UserCard";
+import {ethers} from "ethers";
 
 function Main() {
-  const contract = useContext(ContractContext);
+  const { bond: bondContract, token: tokenContract } = useContext(ContractContext);
   const { message, setMessage } = useContext(AppContext);
   const [currentAccount, setCurrentAccount] = useState(null);
   const [bondInfo, setBondInfo] = useState(null);
@@ -47,10 +48,18 @@ function Main() {
   }, [setMessage]);
 
   useEffect(() => {
+    const tokenDecimalsPromise = tokenContract.decimals();
+
     const getBondInfo = async () => {
       try {
-        const bondInfo = await contract.bondInfo();
-        setBondInfo(bondInfo);
+        const tokenDecimals = await tokenDecimalsPromise;
+
+        const bondInfo = await bondContract.bondInfo();
+
+        setBondInfo({
+          ...bondInfo,
+          minimumDeposit: ethers.utils.formatUnits(bondInfo.minimumDeposit, tokenDecimals)
+        });
       } catch (error) {
         setMessage({ type: "error", content: error.message });
       }
@@ -58,8 +67,14 @@ function Main() {
 
     const getUserInfo = async () => {
       try {
-        const userInfo = await contract.userInfo(currentAccount);
-        setUserInfo(userInfo);
+        const tokenDecimals = await tokenDecimalsPromise;
+
+        const userInfo = await bondContract.userInfo(currentAccount);
+
+        setUserInfo({
+          ...userInfo,
+          amountDeposited: ethers.utils.formatUnits(userInfo.amountDeposited, tokenDecimals)
+        });
       } catch (error) {
         setMessage({ type: "error", content: error.message });
       }
@@ -69,7 +84,7 @@ function Main() {
       getBondInfo();
       getUserInfo();
     }
-  }, [currentAccount, contract, setMessage]);
+  }, [currentAccount, bondContract, tokenContract, setMessage]);
 
   return (
     <Container maxWidth="sm" sx={{ mt: 1 }}>

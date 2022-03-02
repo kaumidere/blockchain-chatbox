@@ -23,7 +23,7 @@ function BondCard({ bondInfo }) {
     <Card sx={{ my: 2 }}>
       <CardHeader
         title="Bond"
-        subheader={`Minimum Deposit: ${bondInfo.minimumDeposit.toNumber()}`}
+        subheader={`Minimum Deposit: ${bondInfo.minimumDeposit}`}
         action={
           bondInfo.isActive ? (
             <Chip label="Active" variant="outlined" color="success" />

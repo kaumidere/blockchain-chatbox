@@ -10,7 +10,7 @@ import { TRANSACTION_PREFIX } from "../../constants";
 import { AppContext, ContractContext } from "../App";
 
 function Withdraw({ open, setOpen }) {
-  const contract = useContext(ContractContext);
+  const contract = useContext(ContractContext).bond;
   const { setMessage } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
 

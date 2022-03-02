@@ -35,7 +35,7 @@ function UserCard({ userInfo }) {
       <CardHeader title="User" />
       <CardContent>
         <Typography>
-          Amount Deposited: {userInfo.amountDeposited.toNumber()}
+          Amount Deposited: {userInfo.amountDeposited}
         </Typography>
         <Typography>
           Deposited On: {getDisplayTime(userInfo.depositedOn.toNumber())}
