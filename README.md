@@ -18,7 +18,7 @@
 
 # User Interface
 
-- https://kaumidere.github.io/blockchain-developer-bootcamp-final-project/
+-https://github.com/kaumidere/blockchain-chatbox/
 
 # Ethereum Account
 
